@@ -1,18 +1,18 @@
-var express = require('express');
-const { listen } = require('socket.io');
-var app = express();
-var server = require('http').createServer(app);
-var io = require('socket.io')(server);
+const express = require('express');
+const app = express();
+const http = require('http');
+const server = http.createServer(app);
+const { Server } = require('socket.io');
+const io = new Server(server);
 
 users = [];
 connections = [];
-server.listen(3000);
 
-app.get('/', function (req, resp) {
-  resp.sendFile(__dirname + '/index.html');
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/index.html');
 });
 
-io.sockets.on('connection', function (socket) {
+io.on('connection', (socket) => {
   connections.push(socket);
   console.log('connected: %s socket connected', connections.length);
   socket.on('disconnect', function (data) {
@@ -24,6 +24,10 @@ io.sockets.on('connection', function (socket) {
     console.log(data);
     io.sockets.emit('new message', { msg: data });
   });
+});
+
+server.listen(3000, () => {
+  console.log('listening on *:3000');
 });
 
 console.log('server is listening');
